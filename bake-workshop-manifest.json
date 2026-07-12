@@ -1,0 +1,15 @@
+{
+  "id": "roche-bake-workshop",
+  "name": "私密烘焙工坊",
+  "version": "9.0.0",
+  "description": "Sweet Bite：私密烘焙工坊 v9.0 内衣特典。制作专属甜品，搭配私密衣橱，与你喜爱的角色开启香甜暧昧的互动时光。",
+  "author": "CHERRY7721",
+  "entry": "https://raw.githubusercontent.com/CHERRY7721/Roche/main/bake-workshop.js",
+  "hash": "",
+  "permissions": [
+    "character:read",
+    "ai:chat",
+    "storage",
+    "ui"
+  ]
+}
