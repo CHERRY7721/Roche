@@ -1,14 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件
-// 读取 Roche 角色列表，选择角色后生成同学录，可写入记忆
+// 青春同学录 - Roche 插件 (修复版 v1.0.1)
+// 适配 iOS 安全区域，防卡死，增强错误处理
 // ============================================================
 
 (function() {
-  // 插件注册
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.0",
+    version: "1.0.1",
     apps: [
       {
         id: "classmate-memory-home",
@@ -16,26 +15,30 @@
         icon: "book",
         iconImage: "",
         async mount(container, roche) {
-          // ---------- 渲染插件界面 ----------
+          // ---------- 渲染界面 ----------
           const appId = "classmate-memory";
           container.innerHTML = `
-            <div class="roche-plugin-classmate">
+            <div class="roche-plugin-classmate" style="height:100%;display:flex;flex-direction:column;position:relative;padding-top: env(safe-area-inset-top, 0px);padding-bottom: env(safe-area-inset-bottom, 0px);">
               <style>
-                /* 样式限定在 .roche-plugin-classmate 内 */
+                /* ===== 样式全部限定在 .roche-plugin-classmate 内 ===== */
                 .roche-plugin-classmate * { box-sizing: border-box; margin:0; padding:0; }
                 .roche-plugin-classmate { 
                   display:flex; flex-direction:column; height:100%; 
                   background: var(--bg, #f5f5f5); color: var(--text-main, #333);
                   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  position:relative;
                 }
-                /* 6大主题（适配 Roche 主题变量，也提供默认） */
+                /* 6大主题 */
                 .roche-plugin-classmate[data-theme="mint"] { --bg: #e0f2f1; --panel: #ffffff; --primary: #00897b; --primary-light: #b2dfdb; --text-main: #004d40; --text-sub: #00695c; --paper: #f4fbfb; --tape: rgba(178,223,219,0.5); }
                 .roche-plugin-classmate[data-theme="sakura"] { --bg: #fce4ec; --panel: #ffffff; --primary: #e91e63; --primary-light: #f8bbd0; --text-main: #880e4f; --text-sub: #ad1457; --paper: #fff5f8; --tape: rgba(248,187,208,0.5); }
                 .roche-plugin-classmate[data-theme="ocean"] { --bg: #e1f5fe; --panel: #ffffff; --primary: #039be5; --primary-light: #b3e5fc; --text-main: #01579b; --text-sub: #0277bd; --paper: #f0f9ff; --tape: rgba(179,229,252,0.5); }
                 .roche-plugin-classmate[data-theme="autumn"] { --bg: #fff8e1; --panel: #ffffff; --primary: #ff8f00; --primary-light: #ffecb3; --text-main: #e65100; --text-sub: #ef6c00; --paper: #fffdf5; --tape: rgba(255,236,179,0.5); }
                 .roche-plugin-classmate[data-theme="night"] { --bg: #1a1a2e; --panel: #232336; --primary: #e94560; --primary-light: #533440; --text-main: #eeeeee; --text-sub: #b5b5b5; --paper: #2a2a40; --tape: rgba(83,52,64,0.5); }
                 .roche-plugin-classmate[data-theme="vintage"] { --bg: #d7ccc8; --panel: #f5f5f5; --primary: #5d4037; --primary-light: #bcaaa4; --text-main: #3e2723; --text-sub: #5d4037; --paper: #efebe9; --tape: rgba(188,170,164,0.5); }
-                .roche-plugin-classmate .header { padding:15px 20px; background:var(--panel); display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); }
+                .roche-plugin-classmate .page { display:none; flex-direction:column; height:100%; }
+                .roche-plugin-classmate .page.active { display:flex; animation:fadeIn 0.3s; }
+                @keyframes fadeIn { from{opacity:0; transform:scale(0.98)} to{opacity:1; transform:scale(1)} }
+                .roche-plugin-classmate .header { padding:15px 20px; background:var(--panel); display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); flex-shrink:0; }
                 .roche-plugin-classmate .header-title { font-weight:bold; font-size:18px; color:var(--primary); }
                 .roche-plugin-classmate .theme-btn { font-size:22px; cursor:pointer; padding:5px; background:var(--primary-light); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
                 .roche-plugin-classmate .theme-picker { position:absolute; top:65px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
@@ -95,13 +98,33 @@
                 .roche-plugin-classmate .sys-text { text-align:center; font-size:12px; color:var(--text-sub); margin:10px 0; background:var(--primary-light); padding:6px 15px; border-radius:20px; align-self:center; }
                 .roche-plugin-classmate .loading-blink { animation:blink 1.5s infinite; opacity:0.6; }
                 @keyframes blink { 50% { opacity:0.2; } }
-                .roche-plugin-classmate .back-btn { position:absolute; top:10px; left:10px; background:var(--panel); border:1px solid var(--primary-light); border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer; z-index:50; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+                /* 返回按钮 - 放在安全区内 */
+                .roche-plugin-classmate .back-btn {
+                  position:absolute;
+                  top: calc(env(safe-area-inset-top, 0px) + 10px);
+                  left: 15px;
+                  background:var(--panel);
+                  border:1px solid var(--primary-light);
+                  border-radius:50%;
+                  width:40px;
+                  height:40px;
+                  font-size:20px;
+                  cursor:pointer;
+                  z-index:50;
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+                }
+                .roche-plugin-classmate .loading-text { text-align:center; padding:40px 20px; color:var(--text-sub); }
               </style>
+
               <!-- 返回按钮（关闭插件） -->
               <button class="back-btn" id="classmate-close-btn">✕</button>
+
               <!-- 选人页 -->
               <div class="page active" id="classmate-page-select">
-                <div class="header">
+                <div class="header" style="padding-left:70px;">
                   <div class="header-title">📖 选择他的同学录</div>
                   <div class="theme-btn" onclick="window._classmateToggleThemePicker('themePicker1')">🎨</div>
                 </div>
@@ -114,12 +137,13 @@
                   <div class="theme-dot" style="background:#8d6e63" onclick="window._classmateSetTheme('vintage')"></div>
                 </div>
                 <div class="char-list" id="classmate-charList">
-                  <div style="text-align:center;padding:20px;">加载角色中...</div>
+                  <div class="loading-text">⏳ 加载角色中...</div>
                 </div>
               </div>
+
               <!-- 主页面 -->
               <div class="page" id="classmate-page-main">
-                <div class="header">
+                <div class="header" style="padding-left:70px;">
                   <div class="header-title" id="classmate-roomTitle">他的同学录</div>
                   <div class="theme-btn" onclick="window._classmateToggleThemePicker('themePicker2')">🎨</div>
                 </div>
@@ -163,6 +187,7 @@
                   <div class="nav-item" onclick="window._classmateSwitchTab('chat')"><div class="nav-icon">💬</div>纸条</div>
                 </div>
               </div>
+
               <!-- 模板选择弹窗 -->
               <div class="modal-overlay" id="classmate-tplModal">
                 <div class="tpl-modal">
@@ -174,12 +199,11 @@
             </div>
           `;
 
-          // ---------- 插件逻辑 ----------
-          // 获取 Roche API 并保存到全局（以便事件处理）
+          // ---------- 保存 roche 引用 ----------
           window._classmateRoche = roche;
           const appContainer = container.querySelector('.roche-plugin-classmate');
 
-          // 状态变量
+          // ---------- 状态 ----------
           let contacts = [];
           let targetId = null;
           let charName = '';
@@ -189,7 +213,7 @@
           let currentTpl = null;
           let currentAnswers = [];
 
-          // 模板库（20题）
+          // ---------- 模板库 ----------
           const fixedTemplates = [
             { n: '📋 经典档案录', q: ['姓名','专属昵称','性别/属性','破壳日','星座','血型','最大的爱好','不为人知的特长','最常说的口头禅','最喜欢的颜色','最爱吃的食物','绝对不碰的食物','最喜欢的季节','最崇拜的人','目前的口头禅','最怕的东西','最大的梦想','对我的第一印象','现在对我的感觉','给我的一句话留言'] },
             { n: '💖 青春悸动篇', q: ['第一次心动时刻','最喜欢我身体哪部分','觉得我什么时候最可爱','我做过最让你生气的事','最舍不得我的一点','想带我见家长吗','未来家里养几只宠物','理想中的婚礼地点','家务打算怎么分','谁掌管财政大权','周末最想和我干嘛','吵架了谁先低头','最喜欢亲吻我哪里','喜欢抱抱还是亲亲','最想收到我什么礼物','最想给我制造的惊喜','给我起的专属外号','我不在身边时在想啥','睡前最想听我说什么','会永远爱我吗'] },
@@ -201,10 +225,9 @@
           ];
           const gachaPool = ['最喜欢的电影','最爱听的歌','去过最远的地方','最喜欢的运动','最讨厌的天气','最想见的人','如果能回到过去','你相信外星人吗','如果能长生不老','你最骄傲的事','你最自卑的事','你最想忘记的人','你觉得世界公平吗','你相信命运吗','你最喜欢的数字','你最喜欢的动物','如果能变成一种植物','你最想学的一门语言','你最想掌握的乐器','如果不用工作你想干嘛','最喜欢我穿什么衣服','最喜欢我什么发型','最受不了我撒娇吗','我哭的时候你咋办','我生病的时候你咋办','最想吃我做的什么菜','最想和我一起看日出吗','最想和我一起看雪吗','最想和我一起淋雨吗','最想和我一起发呆吗','你会给我写情书吗','你会给我唱歌吗','你会给我弹琴吗','你会给我画画吗','你会一直牵着我吗','你会背我吗','你会公主抱我吗','你会摸头杀吗','你会壁咚我吗','流落荒岛','被困电梯','中了彩票','穿越到古代','变成超人','变成吸血鬼','变成妖怪','变成神仙','最后一天','如果是梦','如果世界是游戏'];
 
-          // ---------- 工具函数 ----------
           function getAvatar(id) { return `https://picsum.photos/seed/${id}/100/100`; }
 
-          // ---------- 加载角色 ----------
+          // ---------- 加载角色（防卡死） ----------
           async function loadCharacters() {
             try {
               const chars = await roche.character.list();
@@ -216,7 +239,7 @@
                   avatar: c.avatar || getAvatar(c.id)
                 }));
               } else {
-                // 如果角色列表为空，添加一些示例
+                // 无角色时使用示例
                 contacts = [
                   { id: 'demo1', name: '林小夕', persona: '温柔文艺，喜欢写诗和弹吉他', avatar: getAvatar('demo1') },
                   { id: 'demo2', name: '陆子轩', persona: '阳光运动型，篮球校队', avatar: getAvatar('demo2') },
@@ -236,7 +259,7 @@
           function renderCharList() {
             const listEl = document.getElementById('classmate-charList');
             if (!contacts.length) {
-              listEl.innerHTML = `<div style="text-align:center;padding:20px;">暂无角色，请先在 Roche 中添加角色</div>`;
+              listEl.innerHTML = `<div class="loading-text">暂无角色，请先在 Roche 中添加角色</div>`;
               return;
             }
             listEl.innerHTML = contacts.map(c => `
@@ -254,7 +277,6 @@
             if (!detail) return;
             charName = detail.name;
             charPersona = detail.persona || '';
-            // 尝试从 Roche 获取更详细的人设
             try {
               const full = await roche.character.get(id);
               if (full) {
@@ -265,11 +287,10 @@
             document.getElementById('classmate-roomTitle').innerText = `${charName} 的同学录`;
             document.getElementById('classmate-page-select').classList.remove('active');
             document.getElementById('classmate-page-main').classList.add('active');
-            // 默认选择第一个模板
             window._classmateChooseTpl(0, false);
           };
 
-          // ---------- 主题切换 ----------
+          // ---------- 主题 ----------
           window._classmateToggleThemePicker = function(id) {
             document.querySelectorAll('.roche-plugin-classmate .theme-picker').forEach(p => {
               if (p.id !== id) p.classList.remove('show');
@@ -279,13 +300,13 @@
           window._classmateSetTheme = function(theme) {
             appContainer.setAttribute('data-theme', theme);
             document.querySelectorAll('.roche-plugin-classmate .theme-picker').forEach(p => p.classList.remove('show'));
-            // 保存主题偏好到 storage
             roche.storage.set('classmate-theme', theme);
           };
-          // 恢复主题
           (async function() {
-            const saved = await roche.storage.get('classmate-theme');
-            if (saved) appContainer.setAttribute('data-theme', saved);
+            try {
+              const saved = await roche.storage.get('classmate-theme');
+              if (saved) appContainer.setAttribute('data-theme', saved);
+            } catch(e) {}
           })();
 
           // ---------- 模板弹窗 ----------
@@ -325,7 +346,7 @@
             document.getElementById('classmate-actionBar').innerHTML = `<button class="btn" onclick="window._classmateInviteFill()">将笔递给他，让他填写 ✏️</button>`;
           }
 
-          // ---------- 填写同学录（调用 AI 生成答案） ----------
+          // ---------- 填写 ----------
           window._classmateInviteFill = async function() {
             if (isGenerating) return;
             isGenerating = true;
@@ -335,7 +356,6 @@
             }
             document.getElementById('classmate-actionBar').innerHTML = `<button class="btn btn-outline" disabled>笔尖沙沙作响，正在认真填写...</button>`;
 
-            // 构建 AI 请求
             const sysPrompt = `你正在扮演【${charName}】，人设：${charPersona}。用户是【${myName}】，你必须用“你”来称呼用户。
 现在你正在填写用户递给你的名为“${currentTpl.n}”的手账本。
 必须回答20个问题。答案要简短生动，符合你的性格。
@@ -365,6 +385,11 @@
               });
             } catch (e) {
               roche.ui.toast('AI 生成失败：' + e.message);
+              // 填入占位，避免空白
+              for (let i=0; i<20; i++) {
+                let el = document.getElementById(`classmate-ans-${i}`);
+                if (el) el.innerHTML = '（生成失败）';
+              }
             }
 
             isGenerating = false;
@@ -377,7 +402,7 @@
             `;
           };
 
-          // ---------- 发送到聊天（小纸条） ----------
+          // ---------- 发送到聊天 ----------
           window._classmateSendToChat = function() {
             window._classmateSwitchTab('chat');
             let summary = `[已发送他刚刚填写的《${currentTpl.n}》]<br><br>`;
@@ -387,15 +412,13 @@
               }
             }
             appendChat('user', summary);
-            // 让 AI 回复
             const prompt = `用户把刚才你填好的《${currentTpl.n}》发给了你。请你根据自己填写的答案或你的人设，自然地作出反应。\n【强制规则】：\n1. 必须用“你”称呼用户。\n2. 绝对不可代替用户说话或做动作。\n3. 必须先输出你的真实心声（含<THOUGHT>标签），再输出你发给用户的消息。`;
             callChatAI(prompt);
           };
 
-          // ---------- 存入 Roche 记忆 ----------
+          // ---------- 存入记忆 ----------
           window._classmateSaveToMemory = async function() {
             if (!targetId) return;
-            // 将填写的答案组合成一段记忆文本
             let memoryText = `《${currentTpl.n}》同学录记录：\n`;
             for (let i=0; i<20; i++) {
               if (currentAnswers[i]) {
@@ -403,7 +426,6 @@
               }
             }
             try {
-              // 获取该角色的会话ID
               const char = await roche.character.get(targetId);
               const conversationId = char.conversationId || targetId;
               await roche.memory.write({
@@ -421,7 +443,7 @@
             }
           };
 
-          // ---------- 聊天功能 ----------
+          // ---------- 聊天辅助 ----------
           function appendChat(role, htmlContent) {
             let box = document.getElementById('classmate-chatBox');
             box.insertAdjacentHTML('beforeend', `<div class="msg-wrap ${role}"><div class="msg-bubble">${htmlContent}</div></div>`);
@@ -475,7 +497,6 @@
           window._classmateSwitchTab = function(tab) {
             document.querySelectorAll('.roche-plugin-classmate .tab-page, .roche-plugin-classmate .nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('classmate-tab-'+tab).classList.add('active');
-            // 高亮 nav
             document.querySelectorAll('.roche-plugin-classmate .nav-item').forEach(item => {
               if (item.textContent.includes(tab==='book'?'手账':'纸条')) item.classList.add('active');
             });
@@ -486,25 +507,15 @@
             roche.ui.closeApp();
           });
 
-          // ---------- 初始化加载角色 ----------
+          // ---------- 启动加载角色 ----------
           await loadCharacters();
         },
         async unmount(container, roche) {
-          // 清理：移除所有事件监听（但这里使用全局函数，在 unmount 时无需额外清理，因为容器被清空）
           container.replaceChildren();
-          // 清理全局引用
-          delete window._classmateRoche;
-          delete window._classmateSelectChar;
-          delete window._classmateToggleThemePicker;
-          delete window._classmateSetTheme;
-          delete window._classmateOpenTplModal;
-          delete window._classmateCloseTplModal;
-          delete window._classmateChooseTpl;
-          delete window._classmateInviteFill;
-          delete window._classmateSendToChat;
-          delete window._classmateSaveToMemory;
-          delete window._classmateSendChat;
-          delete window._classmateSwitchTab;
+          // 清理全局引用（可选）
+          ['_classmateRoche','_classmateSelectChar','_classmateToggleThemePicker','_classmateSetTheme','_classmateOpenTplModal','_classmateCloseTplModal','_classmateChooseTpl','_classmateInviteFill','_classmateSendToChat','_classmateSaveToMemory','_classmateSendChat','_classmateSwitchTab'].forEach(key => {
+            delete window[key];
+          });
         }
       }
     ]
