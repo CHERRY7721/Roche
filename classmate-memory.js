@@ -1,13 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件 (顶栏上移版 v1.0.4)
-// 调整：顶栏 padding-top 从 15px → 5px，整体上移约 10px
+// 青春同学录 - Roche 插件 (顶栏彻底上移版 v1.0.5)
+// 强制 padding-top: 0 !important，并添加红色测试边框
 // ============================================================
 
 (function() {
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.4",
+    version: "1.0.5",
     apps: [
       {
         id: "classmate-memory-home",
@@ -18,7 +18,7 @@
           container.innerHTML = `
             <div class="roche-plugin-classmate" style="height:100%;display:flex;flex-direction:column;position:relative;padding-top: env(safe-area-inset-top, 0px);padding-bottom: env(safe-area-inset-bottom, 0px);overflow-x:hidden;">
               <style>
-                /* ===== 全部样式限定 ===== */
+                /* 全部样式限定在 .roche-plugin-classmate 内 */
                 .roche-plugin-classmate * { box-sizing: border-box; margin:0; padding:0; }
                 .roche-plugin-classmate { 
                   display:flex; flex-direction:column; height:100%; 
@@ -38,19 +38,21 @@
                 .roche-plugin-classmate .page.active { display:flex; animation:fadeIn 0.3s; }
                 @keyframes fadeIn { from{opacity:0; transform:scale(0.98)} to{opacity:1; transform:scale(1)} }
                 
-                /* ===== 顶栏 padding-top 从 15px 改为 5px ===== */
+                /* ===== 顶栏强制上移 ===== */
                 .roche-plugin-classmate .header { 
-                  padding: 5px 20px 10px 20px;   /* 上5px 右20px 下10px 左20px */
-                  background:var(--panel); 
-                  display:flex; 
-                  justify-content:space-between; 
-                  align-items:center; 
-                  border-bottom:2px solid var(--primary); 
-                  flex-shrink:0; 
+                  padding: 0px 20px 10px 20px !important;   /* 上边距强制为0 */
+                  background: var(--panel); 
+                  display: flex; 
+                  justify-content: space-between; 
+                  align-items: center; 
+                  border-bottom: 2px solid var(--primary); 
+                  flex-shrink: 0;
+                  /* 临时红色边框，确认生效后删除 */
+                  border-top: 3px solid red;
                 }
                 .roche-plugin-classmate .header-title { font-weight:bold; font-size:18px; color:var(--primary); }
                 .roche-plugin-classmate .theme-btn { font-size:22px; cursor:pointer; padding:5px; background:var(--primary-light); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
-                .roche-plugin-classmate .theme-picker { position:absolute; top:55px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
+                .roche-plugin-classmate .theme-picker { position:absolute; top:50px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
                 .roche-plugin-classmate .theme-picker.show { display:grid; }
                 .roche-plugin-classmate .theme-dot { width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
                 .roche-plugin-classmate .char-list { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:15px; }
@@ -86,7 +88,7 @@
                 .roche-plugin-classmate .btn-row { display:flex; gap:10px; }
                 .roche-plugin-classmate .btn-row .btn { flex:1; font-size:14px; padding:12px; }
 
-                /* ===== 聊天区域 ===== */
+                /* ===== 聊天区域（已修复） ===== */
                 .roche-plugin-classmate .chat-history {
                   flex:1;
                   overflow-y:auto;
@@ -202,7 +204,7 @@
                 @keyframes blink { 50% { opacity:0.2; } }
                 .roche-plugin-classmate .back-btn {
                   position:absolute;
-                  top: calc(env(safe-area-inset-top, 0px) + 5px);  /* 跟随顶栏上移 */
+                  top: calc(env(safe-area-inset-top, 0px) + 0px);  /* 跟着顶栏上移 */
                   left: 15px;
                   background:var(--panel);
                   border:1px solid var(--primary-light);
@@ -300,7 +302,7 @@
             </div>
           `;
 
-          // ---------- 以下逻辑与之前完全相同（未改动） ----------
+          // ---------- JavaScript 逻辑（与之前一致，未改动） ----------
           window._classmateRoche = roche;
           const appContainer = container.querySelector('.roche-plugin-classmate');
 
