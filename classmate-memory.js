@@ -1,13 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件 (顶栏完美适配版 v1.0.7)
-// 顶栏下移、返回按钮与主题按钮对齐、标题居中
+// 青春同学录 - Roche 插件 (顶栏微调版 v1.0.8)
+// padding-top 从 12px 改为 6px
 // ============================================================
 
 (function() {
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.7",
+    version: "1.0.8",
     apps: [
       {
         id: "classmate-memory-home",
@@ -16,7 +16,6 @@
         iconImage: "",
         async mount(container, roche) {
           container.innerHTML = `
-            <!-- 最外层容器 -->
             <div class="roche-plugin-classmate" style="height:100%;display:flex;flex-direction:column;position:relative;padding-top: env(safe-area-inset-top, 0px);padding-bottom: env(safe-area-inset-bottom, 0px);overflow-x:hidden;">
               <style>
                 .roche-plugin-classmate * { box-sizing: border-box; margin:0; padding:0; }
@@ -38,12 +37,12 @@
                 .roche-plugin-classmate .page.active { display:flex; animation:fadeIn 0.3s; }
                 @keyframes fadeIn { from{opacity:0; transform:scale(0.98)} to{opacity:1; transform:scale(1)} }
                 
-                /* ===== 顶栏（新布局） ===== */
+                /* ===== 顶栏（padding-top 改为 6px） ===== */
                 .roche-plugin-classmate .header {
                   display: flex;
                   align-items: center;
                   justify-content: space-between;
-                  padding: 12px 16px 10px 16px;  /* 上边距12px，让内容下移 */
+                  padding: 6px 16px 10px 16px;  /* 上边距 6px，刚好低于灵动岛 */
                   background: var(--panel);
                   border-bottom: 2px solid var(--primary);
                   flex-shrink: 0;
@@ -55,12 +54,11 @@
                   font-weight: bold;
                   font-size: 18px;
                   color: var(--primary);
-                  margin: 0 10px; /* 左右留一点间距 */
+                  margin: 0 10px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
                 }
-                /* 返回按钮（在header内，作为flex项） */
                 .roche-plugin-classmate .back-btn {
                   display: flex;
                   align-items: center;
@@ -81,7 +79,6 @@
                   transform: scale(0.92);
                   background: var(--primary-light);
                 }
-                /* 主题按钮 */
                 .roche-plugin-classmate .theme-btn {
                   font-size: 22px;
                   cursor: pointer;
@@ -103,7 +100,7 @@
                   transform: scale(0.92);
                 }
 
-                .roche-plugin-classmate .theme-picker { position:absolute; top:60px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
+                .roche-plugin-classmate .theme-picker { position:absolute; top:55px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
                 .roche-plugin-classmate .theme-picker.show { display:grid; }
                 .roche-plugin-classmate .theme-dot { width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
                 .roche-plugin-classmate .char-list { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:15px; }
@@ -332,7 +329,7 @@
             </div>
           `;
 
-          // ---------- JavaScript 逻辑（功能不变，仅更新返回按钮事件绑定） ----------
+          // ---------- JavaScript 逻辑（与 v1.0.7 完全相同） ----------
           window._classmateRoche = roche;
           const appContainer = container.querySelector('.roche-plugin-classmate');
 
@@ -622,7 +619,6 @@
             });
           };
 
-          // 绑定返回按钮事件（两个header中的返回按钮）
           document.getElementById('classmate-close-btn-select').addEventListener('click', () => {
             roche.ui.closeApp();
           });
