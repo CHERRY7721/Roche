@@ -1,13 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件 (顶栏微调版 v1.0.8)
-// padding-top 从 12px 改为 6px
+// 青春同学录 - Roche 插件 (干净上移版 v1.0.9)
+// 移除红线，padding-top: 4px
 // ============================================================
 
 (function() {
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.8",
+    version: "1.0.9",
     apps: [
       {
         id: "classmate-memory-home",
@@ -37,16 +37,15 @@
                 .roche-plugin-classmate .page.active { display:flex; animation:fadeIn 0.3s; }
                 @keyframes fadeIn { from{opacity:0; transform:scale(0.98)} to{opacity:1; transform:scale(1)} }
                 
-                /* ===== 顶栏（padding-top 改为 6px） ===== */
+                /* ===== 顶栏（padding-top: 4px，无红线） ===== */
                 .roche-plugin-classmate .header {
                   display: flex;
                   align-items: center;
                   justify-content: space-between;
-                  padding: 6px 16px 10px 16px;  /* 上边距 6px，刚好低于灵动岛 */
+                  padding: 4px 16px 10px 16px;   /* 上边距4px，更贴近顶部 */
                   background: var(--panel);
                   border-bottom: 2px solid var(--primary);
                   flex-shrink: 0;
-                  border-top: 3px solid red; /* 测试边框，确认后删除 */
                 }
                 .roche-plugin-classmate .header-title {
                   flex: 1;
@@ -100,7 +99,7 @@
                   transform: scale(0.92);
                 }
 
-                .roche-plugin-classmate .theme-picker { position:absolute; top:55px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
+                .roche-plugin-classmate .theme-picker { position:absolute; top:50px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
                 .roche-plugin-classmate .theme-picker.show { display:grid; }
                 .roche-plugin-classmate .theme-dot { width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
                 .roche-plugin-classmate .char-list { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:15px; }
@@ -329,7 +328,7 @@
             </div>
           `;
 
-          // ---------- JavaScript 逻辑（与 v1.0.7 完全相同） ----------
+          // ---------- JavaScript 逻辑（与之前相同） ----------
           window._classmateRoche = roche;
           const appContainer = container.querySelector('.roche-plugin-classmate');
 
