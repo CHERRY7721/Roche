@@ -1,13 +1,16 @@
 {
-  "id": "secret-bakery",
-  "name": "私密烘焙工坊",
+  "id": "classmate-memory",
+  "name": "青春同学录",
   "version": "1.0.0",
-  "description": "为心爱的角色定制专属蛋糕，并触发色气满满的互动。",
+  "description": "为角色定制专属同学录，填写模板并存入记忆，支持小纸条聊天",
   "author": "CHERRY7721",
-  "entry": "https://raw.githubusercontent.com/CHERRY7721/Roche/main/secret-bakery.js",
+  "entry": "https://raw.githubusercontent.com/CHERRY7721/Roche/main/classmate-memory.js",
   "hash": "",
   "permissions": [
+    "persona:read",
     "character:read",
+    "memory:read",
+    "memory:write",
     "ai:chat",
     "storage",
     "ui"
