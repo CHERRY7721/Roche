@@ -1,13 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件 (修复版 v1.0.1)
-// 适配 iOS 安全区域，防卡死，增强错误处理
+// 青春同学录 - Roche 插件 (UI 微调版 v1.0.2)
+// 仅调整底部聊天输入栏样式，功能无变动
 // ============================================================
 
 (function() {
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.1",
+    version: "1.0.2",
     apps: [
       {
         id: "classmate-memory-home",
@@ -15,12 +15,10 @@
         icon: "book",
         iconImage: "",
         async mount(container, roche) {
-          // ---------- 渲染界面 ----------
-          const appId = "classmate-memory";
           container.innerHTML = `
             <div class="roche-plugin-classmate" style="height:100%;display:flex;flex-direction:column;position:relative;padding-top: env(safe-area-inset-top, 0px);padding-bottom: env(safe-area-inset-bottom, 0px);">
               <style>
-                /* ===== 样式全部限定在 .roche-plugin-classmate 内 ===== */
+                /* ===== 全部样式限定 ===== */
                 .roche-plugin-classmate * { box-sizing: border-box; margin:0; padding:0; }
                 .roche-plugin-classmate { 
                   display:flex; flex-direction:column; height:100%; 
@@ -84,10 +82,54 @@
                 .roche-plugin-classmate .user .msg-bubble { background:linear-gradient(135deg, var(--primary), var(--primary-light)); color:#111; border-bottom-right-radius:4px; font-weight:500; }
                 .roche-plugin-classmate .ai .msg-bubble { background:var(--panel); border:1px solid var(--primary-light); border-bottom-left-radius:4px; color:var(--text-main); }
                 .roche-plugin-classmate .thought-box { margin-bottom:8px; font-size:13px; color:var(--text-sub); font-style:italic; background:var(--paper); padding:10px 15px; border-radius:16px; border:1px dashed var(--primary-light); border-left:4px solid var(--primary); width:100%; }
-                .roche-plugin-classmate .chat-input-bar { background:var(--panel); padding:12px 15px; border-top:1px solid var(--primary-light); display:flex; gap:12px; align-items:center; }
-                .roche-plugin-classmate .chat-input { flex:1; background:var(--bg); border:1px solid var(--primary-light); padding:14px 20px; border-radius:24px; font-size:15px; outline:none; color:var(--text-main); }
-                .roche-plugin-classmate .chat-input:focus { border-color:var(--primary); background:var(--panel); box-shadow:0 0 0 3px var(--primary-light); }
-                .roche-plugin-classmate .chat-send { background:var(--primary); border:none; color:#fff; width:48px; height:48px; border-radius:50%; font-size:20px; cursor:pointer; flex-shrink:0; }
+
+                /* ===== 修改部分：聊天输入栏 ===== */
+                .roche-plugin-classmate .chat-input-bar {
+                  background:var(--panel);
+                  padding: 14px 20px;          /* 增加内边距，更舒服 */
+                  border-top:1px solid var(--primary-light);
+                  display:flex;
+                  gap: 16px;                  /* 输入框与按钮间距变大 */
+                  align-items:center;
+                }
+                .roche-plugin-classmate .chat-input {
+                  flex:1;
+                  background:var(--bg);
+                  border:1px solid var(--primary-light);
+                  padding:14px 20px;
+                  border-radius:24px;
+                  font-size:15px;
+                  outline:none;
+                  color:var(--text-main);
+                  transition:0.2s;
+                }
+                .roche-plugin-classmate .chat-input:focus {
+                  border-color:var(--primary);
+                  background:var(--panel);
+                  box-shadow:0 0 0 3px var(--primary-light);
+                }
+                .roche-plugin-classmate .chat-send {
+                  background:var(--primary-light);      /* 浅色背景，更柔和 */
+                  border: none;
+                  color: var(--primary);               /* 图标用主题色 */
+                  width: 52px;                         /* 略微放大 */
+                  height: 52px;
+                  border-radius:50%;
+                  font-size:24px;                      /* 箭头更大 */
+                  cursor:pointer;
+                  flex-shrink:0;
+                  transition:0.2s;
+                  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                }
+                .roche-plugin-classmate .chat-send:active {
+                  transform:scale(0.92);
+                  background:var(--primary);
+                  color:#fff;
+                }
+
                 .roche-plugin-classmate .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px); z-index:100; display:none; align-items:center; justify-content:center; }
                 .roche-plugin-classmate .modal-overlay.show { display:flex; }
                 .roche-plugin-classmate .tpl-modal { background:var(--panel); width:90%; max-width:380px; border-radius:24px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2); border:2px solid var(--primary-light); display:flex; flex-direction:column; gap:10px; max-height:80vh; overflow-y:auto; }
@@ -98,7 +140,6 @@
                 .roche-plugin-classmate .sys-text { text-align:center; font-size:12px; color:var(--text-sub); margin:10px 0; background:var(--primary-light); padding:6px 15px; border-radius:20px; align-self:center; }
                 .roche-plugin-classmate .loading-blink { animation:blink 1.5s infinite; opacity:0.6; }
                 @keyframes blink { 50% { opacity:0.2; } }
-                /* 返回按钮 - 放在安全区内 */
                 .roche-plugin-classmate .back-btn {
                   position:absolute;
                   top: calc(env(safe-area-inset-top, 0px) + 10px);
@@ -119,7 +160,7 @@
                 .roche-plugin-classmate .loading-text { text-align:center; padding:40px 20px; color:var(--text-sub); }
               </style>
 
-              <!-- 返回按钮（关闭插件） -->
+              <!-- 返回按钮 -->
               <button class="back-btn" id="classmate-close-btn">✕</button>
 
               <!-- 选人页 -->
@@ -199,11 +240,10 @@
             </div>
           `;
 
-          // ---------- 保存 roche 引用 ----------
+          // ---------- 以下逻辑与之前完全相同，未改动 ----------
           window._classmateRoche = roche;
           const appContainer = container.querySelector('.roche-plugin-classmate');
 
-          // ---------- 状态 ----------
           let contacts = [];
           let targetId = null;
           let charName = '';
@@ -213,7 +253,6 @@
           let currentTpl = null;
           let currentAnswers = [];
 
-          // ---------- 模板库 ----------
           const fixedTemplates = [
             { n: '📋 经典档案录', q: ['姓名','专属昵称','性别/属性','破壳日','星座','血型','最大的爱好','不为人知的特长','最常说的口头禅','最喜欢的颜色','最爱吃的食物','绝对不碰的食物','最喜欢的季节','最崇拜的人','目前的口头禅','最怕的东西','最大的梦想','对我的第一印象','现在对我的感觉','给我的一句话留言'] },
             { n: '💖 青春悸动篇', q: ['第一次心动时刻','最喜欢我身体哪部分','觉得我什么时候最可爱','我做过最让你生气的事','最舍不得我的一点','想带我见家长吗','未来家里养几只宠物','理想中的婚礼地点','家务打算怎么分','谁掌管财政大权','周末最想和我干嘛','吵架了谁先低头','最喜欢亲吻我哪里','喜欢抱抱还是亲亲','最想收到我什么礼物','最想给我制造的惊喜','给我起的专属外号','我不在身边时在想啥','睡前最想听我说什么','会永远爱我吗'] },
@@ -227,7 +266,6 @@
 
           function getAvatar(id) { return `https://picsum.photos/seed/${id}/100/100`; }
 
-          // ---------- 加载角色（防卡死） ----------
           async function loadCharacters() {
             try {
               const chars = await roche.character.list();
@@ -239,7 +277,6 @@
                   avatar: c.avatar || getAvatar(c.id)
                 }));
               } else {
-                // 无角色时使用示例
                 contacts = [
                   { id: 'demo1', name: '林小夕', persona: '温柔文艺，喜欢写诗和弹吉他', avatar: getAvatar('demo1') },
                   { id: 'demo2', name: '陆子轩', persona: '阳光运动型，篮球校队', avatar: getAvatar('demo2') },
@@ -270,7 +307,6 @@
             `).join('');
           }
 
-          // ---------- 选择角色 ----------
           window._classmateSelectChar = async function(id) {
             targetId = id;
             const detail = contacts.find(c => c.id === id);
@@ -290,7 +326,6 @@
             window._classmateChooseTpl(0, false);
           };
 
-          // ---------- 主题 ----------
           window._classmateToggleThemePicker = function(id) {
             document.querySelectorAll('.roche-plugin-classmate .theme-picker').forEach(p => {
               if (p.id !== id) p.classList.remove('show');
@@ -309,7 +344,6 @@
             } catch(e) {}
           })();
 
-          // ---------- 模板弹窗 ----------
           window._classmateOpenTplModal = function() {
             document.getElementById('classmate-tplModal').classList.add('show');
           };
@@ -346,7 +380,6 @@
             document.getElementById('classmate-actionBar').innerHTML = `<button class="btn" onclick="window._classmateInviteFill()">将笔递给他，让他填写 ✏️</button>`;
           }
 
-          // ---------- 填写 ----------
           window._classmateInviteFill = async function() {
             if (isGenerating) return;
             isGenerating = true;
@@ -385,7 +418,6 @@
               });
             } catch (e) {
               roche.ui.toast('AI 生成失败：' + e.message);
-              // 填入占位，避免空白
               for (let i=0; i<20; i++) {
                 let el = document.getElementById(`classmate-ans-${i}`);
                 if (el) el.innerHTML = '（生成失败）';
@@ -402,7 +434,6 @@
             `;
           };
 
-          // ---------- 发送到聊天 ----------
           window._classmateSendToChat = function() {
             window._classmateSwitchTab('chat');
             let summary = `[已发送他刚刚填写的《${currentTpl.n}》]<br><br>`;
@@ -416,7 +447,6 @@
             callChatAI(prompt);
           };
 
-          // ---------- 存入记忆 ----------
           window._classmateSaveToMemory = async function() {
             if (!targetId) return;
             let memoryText = `《${currentTpl.n}》同学录记录：\n`;
@@ -443,7 +473,6 @@
             }
           };
 
-          // ---------- 聊天辅助 ----------
           function appendChat(role, htmlContent) {
             let box = document.getElementById('classmate-chatBox');
             box.insertAdjacentHTML('beforeend', `<div class="msg-wrap ${role}"><div class="msg-bubble">${htmlContent}</div></div>`);
@@ -493,7 +522,6 @@
             isGenerating = false;
           }
 
-          // ---------- Tab 切换 ----------
           window._classmateSwitchTab = function(tab) {
             document.querySelectorAll('.roche-plugin-classmate .tab-page, .roche-plugin-classmate .nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('classmate-tab-'+tab).classList.add('active');
@@ -502,17 +530,14 @@
             });
           };
 
-          // ---------- 关闭插件 ----------
           document.getElementById('classmate-close-btn').addEventListener('click', () => {
             roche.ui.closeApp();
           });
 
-          // ---------- 启动加载角色 ----------
           await loadCharacters();
         },
         async unmount(container, roche) {
           container.replaceChildren();
-          // 清理全局引用（可选）
           ['_classmateRoche','_classmateSelectChar','_classmateToggleThemePicker','_classmateSetTheme','_classmateOpenTplModal','_classmateCloseTplModal','_classmateChooseTpl','_classmateInviteFill','_classmateSendToChat','_classmateSaveToMemory','_classmateSendChat','_classmateSwitchTab'].forEach(key => {
             delete window[key];
           });
