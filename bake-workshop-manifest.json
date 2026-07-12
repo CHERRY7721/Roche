@@ -1,0 +1,17 @@
+{
+  "id": "roche-bake-workshop",
+  "name": "私密烘焙工坊",
+  "version": "9.5.0",
+  "description": "Sweet Bite：私密烘焙工坊 v9.5 极致肉欲特典。新增宿主记忆互通，重构双按钮并排 UI，完美适配移动端输入，享受更漫长、更湿热、更粗暴的爱欲纠缠。",
+  "author": "CHERRY7721",
+  "entry": "https://raw.githubusercontent.com/CHERRY7721/Roche/main/bake-workshop.js",
+  "hash": "",
+  "permissions": [
+    "character:read",
+    "memory:read",
+    "memory:write",
+    "ai:chat",
+    "storage",
+    "ui"
+  ]
+}
