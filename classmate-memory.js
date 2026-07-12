@@ -1,13 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件 (聊天界面修复版 v1.0.3)
-// 修复：禁止左右滚动、发送按钮完整可见、适配安全区域
+// 青春同学录 - Roche 插件 (顶栏上移版 v1.0.4)
+// 调整：顶栏 padding-top 从 15px → 5px，整体上移约 10px
 // ============================================================
 
 (function() {
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.3",
+    version: "1.0.4",
     apps: [
       {
         id: "classmate-memory-home",
@@ -25,7 +25,7 @@
                   background: var(--bg, #f5f5f5); color: var(--text-main, #333);
                   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                   position:relative;
-                  overflow-x:hidden; /* 防止整体横向滚动 */
+                  overflow-x:hidden;
                 }
                 /* 6大主题 */
                 .roche-plugin-classmate[data-theme="mint"] { --bg: #e0f2f1; --panel: #ffffff; --primary: #00897b; --primary-light: #b2dfdb; --text-main: #004d40; --text-sub: #00695c; --paper: #f4fbfb; --tape: rgba(178,223,219,0.5); }
@@ -37,10 +37,20 @@
                 .roche-plugin-classmate .page { display:none; flex-direction:column; height:100%; }
                 .roche-plugin-classmate .page.active { display:flex; animation:fadeIn 0.3s; }
                 @keyframes fadeIn { from{opacity:0; transform:scale(0.98)} to{opacity:1; transform:scale(1)} }
-                .roche-plugin-classmate .header { padding:15px 20px; background:var(--panel); display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); flex-shrink:0; }
+                
+                /* ===== 顶栏 padding-top 从 15px 改为 5px ===== */
+                .roche-plugin-classmate .header { 
+                  padding: 5px 20px 10px 20px;   /* 上5px 右20px 下10px 左20px */
+                  background:var(--panel); 
+                  display:flex; 
+                  justify-content:space-between; 
+                  align-items:center; 
+                  border-bottom:2px solid var(--primary); 
+                  flex-shrink:0; 
+                }
                 .roche-plugin-classmate .header-title { font-weight:bold; font-size:18px; color:var(--primary); }
                 .roche-plugin-classmate .theme-btn { font-size:22px; cursor:pointer; padding:5px; background:var(--primary-light); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
-                .roche-plugin-classmate .theme-picker { position:absolute; top:65px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
+                .roche-plugin-classmate .theme-picker { position:absolute; top:55px; right:15px; background:var(--panel); border-radius:16px; padding:12px; display:none; grid-template-columns:repeat(3,1fr); gap:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); border:1px solid var(--primary-light); z-index:40; }
                 .roche-plugin-classmate .theme-picker.show { display:grid; }
                 .roche-plugin-classmate .theme-dot { width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
                 .roche-plugin-classmate .char-list { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:15px; }
@@ -49,7 +59,7 @@
                 .roche-plugin-classmate .char-av { width:56px; height:56px; border-radius:50%; background-size:cover; background-position:center; border:3px solid var(--primary); flex-shrink:0; }
                 .roche-plugin-classmate .char-name { font-weight:bold; font-size:16px; flex:1; }
                 .roche-plugin-classmate .main-view { flex:1; position:relative; overflow:hidden; }
-                .roche-plugin-classmate .tab-page { position:absolute; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; overflow-y:auto; overflow-x:hidden; } /* 禁止横向滚动 */
+                .roche-plugin-classmate .tab-page { position:absolute; top:0; left:0; width:100%; height:100%; display:none; flex-direction:column; overflow-y:auto; overflow-x:hidden; }
                 .roche-plugin-classmate .tab-page.active { display:flex; }
                 .roche-plugin-classmate .bottom-nav { display:flex; background:var(--panel); border-top:1px solid var(--primary-light); padding:10px 5px 15px; flex-shrink:0; }
                 .roche-plugin-classmate .nav-item { flex:1; text-align:center; font-size:12px; color:var(--text-sub); display:flex; flex-direction:column; gap:4px; cursor:pointer; font-weight:bold; transition:0.3s; }
@@ -76,22 +86,22 @@
                 .roche-plugin-classmate .btn-row { display:flex; gap:10px; }
                 .roche-plugin-classmate .btn-row .btn { flex:1; font-size:14px; padding:12px; }
 
-                /* ===== 聊天区域（修复版） ===== */
+                /* ===== 聊天区域 ===== */
                 .roche-plugin-classmate .chat-history {
                   flex:1;
                   overflow-y:auto;
-                  overflow-x:hidden;          /* 禁止横向滚动 */
+                  overflow-x:hidden;
                   padding:20px 15px;
                   display:flex;
                   flex-direction:column;
                   gap:18px;
-                  width:100%;                /* 确保不超出 */
+                  width:100%;
                 }
                 .roche-plugin-classmate .msg-wrap {
                   display:flex;
                   flex-direction:column;
-                  max-width:90%;             /* 留边距，不贴边 */
-                  word-break:break-word;     /* 强制换行，防止溢出 */
+                  max-width:90%;
+                  word-break:break-word;
                 }
                 .roche-plugin-classmate .msg-wrap.user { align-self:flex-end; align-items:flex-end; }
                 .roche-plugin-classmate .msg-wrap.ai { align-self:flex-start; align-items:flex-start; }
@@ -100,8 +110,8 @@
                   border-radius:20px;
                   font-size:15px;
                   line-height:1.6;
-                  word-wrap:break-word;      /* 兼容换行 */
-                  max-width:100%;            /* 不超出父容器 */
+                  word-wrap:break-word;
+                  max-width:100%;
                   box-shadow:0 4px 10px rgba(0,0,0,0.06);
                 }
                 .roche-plugin-classmate .user .msg-bubble {
@@ -132,13 +142,13 @@
 
                 .roche-plugin-classmate .chat-input-bar {
                   background:var(--panel);
-                  padding: 14px 20px 14px 20px;   /* 上左右内边距 */
-                  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); /* 为底部安全区域留空间 */
+                  padding: 14px 20px 14px 20px;
+                  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
                   border-top:1px solid var(--primary-light);
                   display:flex;
                   gap: 16px;
                   align-items:center;
-                  flex-shrink:0;                 /* 防止被压缩 */
+                  flex-shrink:0;
                   width:100%;
                 }
                 .roche-plugin-classmate .chat-input {
@@ -151,7 +161,7 @@
                   outline:none;
                   color:var(--text-main);
                   transition:0.2s;
-                  min-width:0;                  /* 防止溢出 */
+                  min-width:0;
                 }
                 .roche-plugin-classmate .chat-input:focus {
                   border-color:var(--primary);
@@ -192,7 +202,7 @@
                 @keyframes blink { 50% { opacity:0.2; } }
                 .roche-plugin-classmate .back-btn {
                   position:absolute;
-                  top: calc(env(safe-area-inset-top, 0px) + 10px);
+                  top: calc(env(safe-area-inset-top, 0px) + 5px);  /* 跟随顶栏上移 */
                   left: 15px;
                   background:var(--panel);
                   border:1px solid var(--primary-light);
