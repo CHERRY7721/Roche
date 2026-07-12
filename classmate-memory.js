@@ -1,13 +1,13 @@
 // ============================================================
-// 青春同学录 - Roche 插件 (顶栏彻底上移版 v1.0.5)
-// 强制 padding-top: 0 !important，并添加红色测试边框
+// 青春同学录 - Roche 插件 (负边距修正版 v1.0.6)
+// 强制整体上移，吃掉宿主空白
 // ============================================================
 
 (function() {
   window.RochePlugin.register({
     id: "classmate-memory",
     name: "青春同学录",
-    version: "1.0.5",
+    version: "1.0.6",
     apps: [
       {
         id: "classmate-memory-home",
@@ -16,9 +16,9 @@
         iconImage: "",
         async mount(container, roche) {
           container.innerHTML = `
-            <div class="roche-plugin-classmate" style="height:100%;display:flex;flex-direction:column;position:relative;padding-top: env(safe-area-inset-top, 0px);padding-bottom: env(safe-area-inset-bottom, 0px);overflow-x:hidden;">
+            <!-- 最外层容器，添加负边距上移 -->
+            <div class="roche-plugin-classmate" style="height:100%;display:flex;flex-direction:column;position:relative;padding-top:0px;padding-bottom: env(safe-area-inset-bottom, 0px);overflow-x:hidden;margin-top:-22px !important;">
               <style>
-                /* 全部样式限定在 .roche-plugin-classmate 内 */
                 .roche-plugin-classmate * { box-sizing: border-box; margin:0; padding:0; }
                 .roche-plugin-classmate { 
                   display:flex; flex-direction:column; height:100%; 
@@ -38,17 +38,16 @@
                 .roche-plugin-classmate .page.active { display:flex; animation:fadeIn 0.3s; }
                 @keyframes fadeIn { from{opacity:0; transform:scale(0.98)} to{opacity:1; transform:scale(1)} }
                 
-                /* ===== 顶栏强制上移 ===== */
+                /* 顶栏强制上移（padding 已为0） */
                 .roche-plugin-classmate .header { 
-                  padding: 0px 20px 10px 20px !important;   /* 上边距强制为0 */
+                  padding: 0px 20px 10px 20px !important;
                   background: var(--panel); 
                   display: flex; 
                   justify-content: space-between; 
                   align-items: center; 
                   border-bottom: 2px solid var(--primary); 
                   flex-shrink: 0;
-                  /* 临时红色边框，确认生效后删除 */
-                  border-top: 3px solid red;
+                  border-top: 3px solid red; /* 测试用，确认生效后删除 */
                 }
                 .roche-plugin-classmate .header-title { font-weight:bold; font-size:18px; color:var(--primary); }
                 .roche-plugin-classmate .theme-btn { font-size:22px; cursor:pointer; padding:5px; background:var(--primary-light); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
@@ -88,7 +87,6 @@
                 .roche-plugin-classmate .btn-row { display:flex; gap:10px; }
                 .roche-plugin-classmate .btn-row .btn { flex:1; font-size:14px; padding:12px; }
 
-                /* ===== 聊天区域（已修复） ===== */
                 .roche-plugin-classmate .chat-history {
                   flex:1;
                   overflow-y:auto;
@@ -204,7 +202,7 @@
                 @keyframes blink { 50% { opacity:0.2; } }
                 .roche-plugin-classmate .back-btn {
                   position:absolute;
-                  top: calc(env(safe-area-inset-top, 0px) + 0px);  /* 跟着顶栏上移 */
+                  top: calc(env(safe-area-inset-top, 0px) + 0px);
                   left: 15px;
                   background:var(--panel);
                   border:1px solid var(--primary-light);
@@ -222,7 +220,6 @@
                 .roche-plugin-classmate .loading-text { text-align:center; padding:40px 20px; color:var(--text-sub); }
               </style>
 
-              <!-- 返回按钮 -->
               <button class="back-btn" id="classmate-close-btn">✕</button>
 
               <!-- 选人页 -->
@@ -259,7 +256,6 @@
                   <div class="theme-dot" style="background:#8d6e63" onclick="window._classmateSetTheme('vintage')"></div>
                 </div>
                 <div class="main-view">
-                  <!-- 同学录 Tab -->
                   <div class="tab-page active" id="classmate-tab-book">
                     <div class="book-top-bar">
                       <button class="cute-switch-btn" onclick="window._classmateOpenTplModal()">🎀 挑选同学录模板 🎀</button>
@@ -274,7 +270,6 @@
                       <button class="btn" onclick="window._classmateInviteFill()">将笔递给他，让他填写 ✏️</button>
                     </div>
                   </div>
-                  <!-- 闲聊 Tab -->
                   <div class="tab-page" id="classmate-tab-chat">
                     <div class="chat-history" id="classmate-chatBox">
                       <div class="sys-text">这是你们的课桌角。你可以把写好的同学录发给他看。</div>
@@ -291,7 +286,6 @@
                 </div>
               </div>
 
-              <!-- 模板选择弹窗 -->
               <div class="modal-overlay" id="classmate-tplModal">
                 <div class="tpl-modal">
                   <div class="tpl-modal-title">✨ 选择一个模板 ✨</div>
@@ -302,7 +296,7 @@
             </div>
           `;
 
-          // ---------- JavaScript 逻辑（与之前一致，未改动） ----------
+          // ---------- JavaScript 逻辑（与之前一致） ----------
           window._classmateRoche = roche;
           const appContainer = container.querySelector('.roche-plugin-classmate');
 
